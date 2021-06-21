@@ -1,0 +1,1735 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2580
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 ArialMT;\f1\froman\fcharset0 Times-Roman;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 /*
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 ACS 233 Group 9 Assignment 3 - Burglar Alarm Program.
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 Sebastiano Zuddas, Radu Rotaru, Waleed Hamad, Tsun Ho Woo.
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 	NAME: ABM Alarm
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0DATE: 24/01/2020
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0The code below shows the functionality of an anti-burglar alarm system, presented on an LCD Screen,
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0which is controlled by an IR Remote.\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0This system is made to cater a set of user and system requirements, where by the user is able to on set up and control the system with ease.\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0The system consists of 3 slide switches,3 PIRs and 3 Buzzers which will be scattered around the house.\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0Our layout of the building suggests to install the Switches onto 1 Door and 1 Window.
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0The 3 PIRs onto 3 Rooms; each room containing a Buzzer.
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0The system operates when the user presses the RED Button on the IR Remote
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0This enables the machine to turn on to standby mode.
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0The user then prompts the machine by pressing any button to then authorise themselves to the system
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0When authorisation is complete, the user is redirected to the main menu where they will be able to select one of five options;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0"1.ARM", "2.DISARM", "3.COUNTDOWN TIMER", "4.CHANGE PIN", "5.POWER OFF"
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0The user will be able to use the 'back' button to go to previous operations and is able to use the 'pause/start' button to move forward in the operation.
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0The user has a 20 seconds timeout interval, where if no input from the remote is detected, the user is redirected back to the previous operation.
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0The user is unable to turn off the system when ARMED.
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0Buzzer is triggered at any moment the switches open or the PIR detects movement for more than 3 seconds
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0PIR Reads an analogue value in the range of 0 to 1024. when it reaches the maximum value; Buzzer Triggers.
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 */
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 #include <LiquidCrystal.h>
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 #include <IRremote.h>
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 #define DOOR_SW A0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 #define WINDOW_SW A1
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 #define PIR_R1 A2
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 #define PIR_R2 A3
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 #define PIR_R3 A4
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 #define RECV_PIN 7 //IR RECEIVER PIN\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 #define SRN_LED 8
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 #define BUZZER 10
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 #define CTD_LED 13
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 IRrecv irrecv(RECV_PIN);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 decode_results results;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 LiquidCrystal lcd(12, 11, 5, 4, 3, 2); // LCD dital pins
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 char* options[] = \{"1.ARM", "2.DISARM", "3.CTD TIMER", "4.CHANGE PIN", "5.POWER OFF"\}; //Menu Options
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 bool ARMED = false; //System starts UNARMED
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 bool SHUT_DOWN = true; //System is OFF when simulation starts
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 long PIN = 12345; //STARTER PIN
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 long CTD_TIME = 5; //COUNTDOWN TIME\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 long TIME_PERIOD = 1800; //Buzzer will turn off after 30 minutes (1800 seconds)
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 int INTERVAL = 20; //User has a limited time to request a keyboard input, if no inputs are received go back
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 int ATTEMPTS = 3;
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\
+\
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 void auth()\{ //Authentification Function
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0	lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.print("AUTHENTICATION!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.print("PIN:");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0delay(500);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \}
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 long remote_input(int cursor_val, unsigned long calledTime, bool *no_input_received)\{ //Read the inputs from the remote
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0long ATTEMPT = 0; //ATTEMPT = The requested input from the keyboard
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0bool exit_status = false;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0unsigned long startTime;\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0unsigned int value;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.setCursor(cursor_val, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0do\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0startTime = millis()/1000; // Determine the time from the start of arduino
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.blink();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0delay(150);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.noBlink();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0delay(150);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0if(startTime - calledTime > TIME_PERIOD)\{ //Compare the running time with the INTERVAL(sec), if time expired user is redirected
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0//This is also used to determine the 30 minutes period for which the alarm should sound\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0*no_input_received = true;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0if (irrecv.decode(&results)) \{//irrecv.decode(&results) returns true if anything is recieved, and stores info in varible results\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0			value = results.value;			
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0			switch (value) \{ //Switch case on unique integar codes generating by the IR Reciever
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	case 12495:\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		if(ATTEMPT != 0)\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0						lcd.print("0");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0						ATTEMPT = ATTEMPT * 10;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0				case 2295:\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					lcd.print("1");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					ATTEMPT = ATTEMPT * 10 + 1;\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0				case 34935:\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					lcd.print("2");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					ATTEMPT = ATTEMPT * 10 + 2;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0				case 18615:\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					lcd.print("3");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					ATTEMPT = ATTEMPT * 10 + 3;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0				case 10455:
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					lcd.print("4");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		ATTEMPT = ATTEMPT * 10 + 4;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	case 43095:\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					lcd.print("5");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					ATTEMPT = ATTEMPT * 10 + 5;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	case 26775: 		
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					lcd.print("6");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					ATTEMPT = ATTEMPT * 10 + 6;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	case 6375:\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					lcd.print("7");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					ATTEMPT = ATTEMPT * 10 + 7;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	case 39015:\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					lcd.print("8");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					ATTEMPT = ATTEMPT * 10 + 8;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	case 22695:\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					lcd.print("9");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					ATTEMPT = ATTEMPT * 10 + 9;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	case 8415: // Back button, go back
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					exit_status = true;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		*no_input_received = true; // Don't send input back
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0case 41055: //ENTER = EXIT FOLLOW INSTRUCTIONS FROM THE MAIN FUNCTION
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		exit_status = true;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0					break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 					\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0			
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0			irrecv.resume(); // Receive the next value\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\}while(!exit_status); //Exit if Enter or Back button is pressed
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.clear(); // In case back button is pressed
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0return ATTEMPT;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 void trigger()\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0unsigned long startTime;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0unsigned long triggeredTime = millis()/1000; //Get the time when the function was called
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0bool no_input_received = false;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0bool button_pressed;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0long ATT_PIN;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0int cursor_val = 4;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0digitalWrite(SRN_LED, HIGH);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0analogWrite(BUZZER, 127);//Buzz with a PWM of 127
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0delay(100);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0int attempts;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0do\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 	attempts = 3;\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.print("-------ALARM-------");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.print("\'a0 PROVIDE PIN NOW!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.setCursor(0, 0);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0button_pressed = false;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0do\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	startTime = millis()/1000; //Get the time constantly to determine the run time
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		lcd.scrollDisplayLeft(); //Scroll text to the left
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	if (irrecv.decode(&results)) \{//irrecv.decode(&results) returns true if anything is recieved, and stores info in varible results\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0		
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0		irrecv.resume(); //Receive the next value
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	button_pressed = true;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	digitalWrite(SRN_LED, LOW); //Flash the red LED at 4hz
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		delay(250);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	digitalWrite(SRN_LED, HIGH);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	if(startTime - triggeredTime > TIME_PERIOD) //If time exceeds 30 minutes while systm is waiting for input, break
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	\}while(!button_pressed); //While no button is pressed, ALARM notification should stay on until user presses a button
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0if(startTime - triggeredTime > TIME_PERIOD) //In case no inputs are received, break if time exeeds 30 minutes
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0	auth(); //Keyboard was pressed, display authorisation mesage
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0ATT_PIN = remote_input(cursor_val, triggeredTime,\'a0 &no_input_received); //Get the attempted PIN
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	while(ATT_PIN!=PIN) \{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0attempts --;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	startTime = millis()/1000;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	if(attempts == 0 || startTime - triggeredTime > TIME_PERIOD) //If no of attempts exceed or time limit exceed then break.
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0break;\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	lcd.print("INCORRECT PIN!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	lcd.print("ATTEMPTS LEFT " + String(attempts));
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	digitalWrite(SRN_LED, LOW);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(1500);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0digitalWrite(SRN_LED, HIGH);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0auth(); //Display authorisation mesage
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	ATT_PIN = remote_input(cursor_val, triggeredTime,\'a0 &no_input_received); //Authorise using the Attempted PIN
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0if(attempts == 0)\{ //No attempts left, system is entering the PREVENTION MODE
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0		lcd.print("USER PREVENTION!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	lcd.print("------WAIT------");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	for(int index = 0; index < 480; index ++)\{ //System is preventing PIN spam for two minutes
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	digitalWrite(SRN_LED, HIGH);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	lcd.scrollDisplayLeft(); //Keep scrolling the message
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	delay(125);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	digitalWrite(SRN_LED, LOW); //Flash the red LED at 8hz
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	delay(125);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\}\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\}while(attempts<=0); // Keep repeating until the PIN is entered corectly\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.print("BUZZER STOPPED!"); //PIN entered corectly or 30 minutes passed
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0analogWrite(BUZZER, 0); //Stop the buzzer
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0digitalWrite(SRN_LED, LOW); // Turn off the LED
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0ARMED = false; //System will enter the STAND-BY mode
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0ATTEMPTS = 3; //Reset the attempt counter
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0delay(1500);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 void arm()\{//ARM Function
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 	
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0if (analogRead(DOOR_SW) > 1003 || analogRead(WINDOW_SW) > 1003)\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 	lcd.print("DOOR OR WINDOW");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 	lcd.print("OPEN!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0else\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 		lcd.print("SYSTEM IS ARMING");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 		lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 		lcd.print(" \'a0 \'a0 WAIT");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 		for(int index = 0; index <3; index++)\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	\'a0 	delay(500);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		lcd.print(".");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	delay(500);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0	\}	
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 		lcd.print("COUNTDOWN IN");\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 		lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 		lcd.print("PROGRESS.. ");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		for(int index = CTD_TIME; index >0 ; index--)\{ //Engage the countdown timer
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0		lcd.setCursor(11, 1);\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0		digitalWrite(CTD_LED, HIGH);//Flash the green LED
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0		delay(500);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0		digitalWrite(CTD_LED, LOW);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	lcd.print(index); //Print the remaining time\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0		lcd.print(" ");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(500);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		ARMED = true; //System is armed, entering ARMED mode
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\}
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 \}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 void disarm() \{ //Disarm Function
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0if(ARMED)\{ //Check if the system is ARMED
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.print("SYSTEM");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.print("DISARMED!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0ARMED = false; //Disarm the system
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0else\{ //Prevention is case the system is not ARMED\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.print("SYSTEM IS NOT");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.print("ARMED!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 void countdown_timer()\{ //Change Countdown Time Function
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0unsigned long calledTime = millis()/1000; //Get the time when the function was called
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0bool\'a0 no_input_received = false;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0int cursor_val = 9;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0long NEW_TIME;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.print("PLEASE INPUT NEW");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.print("CTD TIME:");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0delay(1000);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0NEW_TIME = remote_input(cursor_val, INTERVAL + calledTime - TIME_PERIOD, &no_input_received); //Get the value of the new countdown timer
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0if( (NEW_TIME < 30 || NEW_TIME > 600) && !no_input_received) // NO LESS THAN 30 sec / NO MORE THAN 5 minutes (600 sec)
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	do \{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		lcd.print("INVALID INPUT!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		lcd.print("PLEASE INPUT NEW");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		lcd.print("CTD TIME:");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		delay(1000);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		cursor_val = 9; //Inital position of digits on the LCD
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	NEW_TIME = remote_input(cursor_val, INTERVAL + calledTime - TIME_PERIOD, &no_input_received);\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	\}while( (NEW_TIME < 30 || NEW_TIME > 600) && !no_input_received); //Exit if correct input given or no inputs were received
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0if(!no_input_received)\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	CTD_TIME = NEW_TIME;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.print("NEW CDT SET!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	delay(2000);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\}
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 \}\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 void change_pin()\{ //Change pin function
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0unsigned long calledTime = millis()/1000; //Get the time when the function was called
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0bool\'a0 no_input_received = false;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0int cursor_val = 4; //Inital position of digits on the LCD
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.print("PLEASE INPUT NEW");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.print("PIN:");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0delay(1000);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0Serial.println(calledTime);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0long NEW_PIN = remote_input(cursor_val, INTERVAL + calledTime - TIME_PERIOD, &no_input_received );\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0if( (NEW_PIN > 99999 || NEW_PIN < 10000) && !no_input_received)
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	do \{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd.setCursor(0, 0);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		lcd.print("INVALID PIN!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(2000);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0cursor_val = 4;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		lcd.print("PLEASE INPUT NEW");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0		lcd.print("PIN:");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	NEW_PIN = remote_input(cursor_val, INTERVAL + calledTime - TIME_PERIOD,\'a0 &no_input_received);\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	\}while( (NEW_PIN > 99999 || NEW_PIN < 10000) && !no_input_received); //Exit if correct input given or no inputs were received
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0if(!no_input_received)\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	PIN = NEW_PIN;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.print("NEW PIN SET!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	delay(2000);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \}\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 void power_off(bool * shut_down)\{ //Power off Function
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0bool exit_status = false;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0unsigned int value;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.print("PRESS RED BUTTON OR BACK TO CANCEL");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0do\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.scrollDisplayLeft();	
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0delay(250);\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0if (irrecv.decode(&results)) \{//irrecv.decode(&results) returns true if anything is recieved, and stores info in varible results\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	value = results.value;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	if(value == 255)\{ //Power button, shut down the system, pass the value to option_menu()
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0			lcd.print("SHUTTING DOWN");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	for(int index = 0; index <3; index++)\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		delay(400);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		lcd.print(".");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	delay(400);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	exit_status = true;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	*shut_down = true;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0else
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if(value == 8415)\{ //Back button, go back to the menu selection
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0exit_status = true;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	irrecv.resume(); //Receive the next value
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\}while(!exit_status);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \}\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 void option_menu(bool *shut_down_to_loop)\{
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 \'a0\'a0ATTEMPTS = 3; // Reset the attempt counter
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0unsigned long calledTime = millis()/1000; // Get the time when the function was called
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0unsigned long runTime; // Time the function is running for
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0unsigned int value;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0bool shut_down = false;\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0bool exit_status = false; // Exit if the back button is pressed or the user wants to shut down\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0int selected = 0; //Navigate through the options
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0int cursor_position = 0; //Either first row or second row
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0do\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0runTime = millis()/1000; //Get the time at every step
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0if(runTime - calledTime > INTERVAL)\{ //If more than INTERVAL (sec) passed, return to STAND-BY / ARMED mode
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.setCursor(0, 0);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.print(options[selected]);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.print(options[selected +1]);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.setCursor(0, cursor_position);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.cursor();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0	delay(300);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.noCursor();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0delay(300);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0if (irrecv.decode(&results)) \{//irrecv.decode(&results) returns true if anything is recieved, and stores info in varible results\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	value = results.value;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	switch (value) \{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	case 4335: // Navigate down
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		if(cursor_position == 0)\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			cursor_position ++;\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		else					
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			selected ++; 	\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	case 20655: // Navigate up
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		if(cursor_position == 1)
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			cursor_position --;\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		else
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			selected --;	
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	case 8415: // Back button, return to stand-by / armed state
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		exit_status = true;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	case 41055: //Enter button
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		int option =\'a0 selected + cursor_position; //Get the selected option
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		irrecv.resume(); // Receive the next value
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		if(option == 1)
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0disarm();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		if(!ARMED) //Prevent access if the system is ARMED
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			switch (option)\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0				case 0:
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			arm(); //System will be armed
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			exit_status = true; //Return to ARMED state
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		case 2:
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			countdown_timer();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		case 3:
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			change_pin();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			break;\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		case 4:
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			power_off(&shut_down);\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			*shut_down_to_loop = shut_down; //Pass this value to loop()
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			if(shut_down)\{ //Retrun to stand-by mode and shut down the system
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0				lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		exit_status = true;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		break;\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0else\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd.print("DISARM SYSTEM");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lcd.print("FIRST!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0delay(2000); \'a0 \'a0 	
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	if(selected == -1)\{ //In case the first option is selected, go to last
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	selected =3;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	cursor_position = 1;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0	 if(selected == 4) \{ //In case the last option is selected, go to first\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	selected = 0;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	cursor_position = 0;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	calledTime = millis()/1000; //Reset the time if any button is pressed
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	irrecv.resume(); // Receive the next value
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	lcd.clear(); //Prevent overwrittings on the LCD
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\}while(!exit_status);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.clear(); //Clear the LCD before returing to STAND-BY / ARMED
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \}\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 void setup() \{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0Serial.begin(9600);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0Serial.println("Enabling IRin");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0irrecv.enableIRIn(); // Enable the infra-red reading
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0Serial.println("Enabled IRin");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0lcd.begin(16, 2);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0pinMode(BUZZER, OUTPUT);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 void loop() \{\'a0
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 \'a0\'a0delay(250);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0unsigned int value;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0unsigned long calledTime;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0bool\'a0 no_input_received = false;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0long ATT_PIN;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0int cursor_val = 4;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0if(SHUT_DOWN)\{ //Turn on the system if it's off
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0do\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0if (irrecv.decode(&results)) \{//irrecv.decode(&results) returns true if anything is recieved, and stores info in varible results
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0			value = results.value;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	if(value == 255)\{ //Power button is pressed, turn on the system
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0				lcd.print("TURNING ON");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		for(int index = 0; index <3; index++)\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			delay(400);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0			lcd.print(".");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		delay(400);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		SHUT_DOWN = false; //System will turn on
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0		\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0	irrecv.resume(); //Receive the next value
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\}while(SHUT_DOWN); //Continously check if the power button is pressed
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0if(ARMED)\{ //The system is ARMED, check for the sensor status
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0lcd.setCursor(0, 0);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.print("ARMED!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0delay(300);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0if(analogRead(DOOR_SW) > 1003 || analogRead(WINDOW_SW) > 1003 || analogRead(PIR_R1) > 1003
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0|| analogRead(PIR_R2) > 1003 || analogRead(PIR_R3) > 1003) //If sensors are detect movement/change is state
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0trigger(); //Trigger the alarm
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0else\{ //The system is in STAND-BY MODE\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.setCursor(0, 0);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	lcd.print(" STAND-BY MODE!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	delay(300);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0if (irrecv.decode(&results)) \{//irrecv.decode(&results) returns true if anything is recieved, and stores info in varible results
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0		calledTime = millis()/1000; //Get the time from when the keyboard was pressed
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	irrecv.resume(); // Receive the next value	
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	auth();
+\f1\fs24 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sl404\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 \'a0\'a0\'a0\'a0	ATT_PIN = remote_input(cursor_val, INTERVAL + calledTime - TIME_PERIOD, &no_input_received); //Get the attempted pin
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0	if(!no_input_received)
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0			while(ATT_PIN!=PIN) \{ //Incorect pin received
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		ATTEMPTS --;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0			lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0			lcd.print("INCORRECT PIN!");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0			lcd.print("ATTEMPTS LEFT " + String(ATTEMPTS));
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	delay(1500);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		if(ATTEMPTS == 0)
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0			lcd.print("AUTHENTICATION! ");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0			lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0			lcd.print("PIN:");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		calledTime = millis()/1000; //RESET FOR EVERY ATTEMPT
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0			ATT_PIN = remote_input(cursor_val, INTERVAL + calledTime - TIME_PERIOD,\'a0 &no_input_received);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		if(no_input_received)
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0		break;
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0			\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if(!no_input_received) 	
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0		if (ATTEMPTS >0)\{
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	lcd.clear();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	lcd.print("\'a0 \'a0 WELCOME!\'a0 ");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	lcd.setCursor(0, 1);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	lcd.print(" CHOOSE OPTION: ");
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	delay(1500);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0			option_menu(&SHUT_DOWN);
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0		else
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0	trigger();
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0\'a0	\}
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \'a0
+\f1\fs24 \
+
+\f0\fs29\fsmilli14667 \}}
