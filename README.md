@@ -11,7 +11,7 @@ The following is the completed activity diagram
 
 ## Class Diagram
 The following is the completed class diagram
-![class diagram](docs/acs233_class_diagra.png)
+![class diagram](docs/acs233_class_diagram.png)
 
 
 
