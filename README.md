@@ -7,11 +7,11 @@ As part of the course ACS233 on System Engineering and Object Oriented Programmi
 ## Activity Diagram
 
 The following is the completed activity diagram
-![activity diagram](docs/acs233-activity-diagram.png)
+![activity diagram](docs/acs233_activity_diagram.png)
 
 ## Class Diagram
 The following is the completed class diagram
-![class diagram](docs/acs233-class-diagra.png)
+![class diagram](docs/acs233_class_diagra.png)
 
 
 
