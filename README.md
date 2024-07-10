@@ -2,3 +2,19 @@
 
 As part of the course ACS233 on System Engineering and Object Oriented Programming, we were tasked to develop a burglar alarm system from inception to delivery. 
 
+# UML
+
+## Activity Diagram
+
+The following is the completed activity diagram
+![activity diagram](docs/acs233-activity-diagram.png)
+
+## Class Diagram
+The following is the completed class diagram
+![class diagram](docs/acs233-class-diagra.png)
+
+
+
+
+
+
